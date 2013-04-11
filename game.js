@@ -64,6 +64,7 @@ var playGame = function() {
   board.add(new Level(level1,winGame));
   Game.setBoard(3,board);
   Game.setBoard(5,new GamePoints(0));
+  Game.setBoard(6,new GameLives());
 };
 
 var winGame = function() {
@@ -145,12 +146,14 @@ var Starfield = function(speed,opacity,numStars,clear) {
 };
 
 var PlayerShip = function() { 
-  this.setup('ship', { vx: 0, reloadTime: 0.25, maxVel: 200 });
+  this.setup('ship', { vx: 0, vy:0, reloadTime: 0.25, maxVel: 200, lives: 3 });
+
+  //Sets initial lives value to be tracked by HUD - CarlosR
+  Game.lives = this.lives;
 
   this.reload = this.reloadTime;
   this.x = Game.width/2 - this.w / 2;
   this.y = Game.height - Game.playerOffset - this.h;
-
   this.step = function(dt) {
     if(Game.keys['left']) { this.vx = -this.maxVel; }
     else if(Game.keys['right']) { this.vx = this.maxVel; }
@@ -193,7 +196,17 @@ PlayerShip.prototype = new Sprite();
 PlayerShip.prototype.type = OBJECT_PLAYER;
 
 PlayerShip.prototype.hit = function(damage) {
-  if(this.board.remove(this)) {
+  //Checks if number of lives is less than 0 - CarlosR
+  this.lives--;
+  Game.lives = this.lives;
+  if(this.lives > 0)
+  {
+    //Instantiates explosion no callback - CarlosR
+    this.board.add(new Explosion(this.x + this.w/2, 
+                                   this.y + this.h/2));
+  }
+  else if(this.board.remove(this)) {
+    //Instantiates explosion with callback- CarlosR
     //Calls loseGame after Explosion animation finishes - CarlosR
      this.board.add(new Explosion(this.x + this.w/2, 
                                    this.y + this.h/2, loseGame));

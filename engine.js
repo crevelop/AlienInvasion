@@ -449,3 +449,21 @@ var GamePoints = function() {
 
   this.step = function(dt) { };
 };
+
+//Renders the Lives status HUD in top left - CarlosR
+var GameLives = function() {
+
+  this.draw = function(ctx) {
+    ctx.save();
+    ctx.font = "bold 18px arial";
+    ctx.fillStyle= "#FFFFFF";
+
+    var txt = "Lives: " + Game.lives;
+
+    ctx.fillText(txt,240,20);
+    ctx.restore();
+
+  };
+
+  this.step = function(dt) { };
+};
