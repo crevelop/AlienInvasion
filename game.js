@@ -194,7 +194,9 @@ PlayerShip.prototype.type = OBJECT_PLAYER;
 
 PlayerShip.prototype.hit = function(damage) {
   if(this.board.remove(this)) {
-    loseGame();
+    //Calls loseGame after Explosion animation finishes - CarlosR
+     this.board.add(new Explosion(this.x + this.w/2, 
+                                   this.y + this.h/2, loseGame));
   }
 };
 
@@ -300,11 +302,13 @@ EnemyMissile.prototype.step = function(dt)  {
 };
 
 
-
-var Explosion = function(centerX,centerY) {
+//Added an optional callback parameter - CarlosR
+var Explosion = function(centerX,centerY, callback) {
   this.setup('explosion', { frame: 0 });
   this.x = centerX - this.w/2;
   this.y = centerY - this.h/2;
+  //Sets the callback to an instance property - CarlosR
+  this.callback = callback;
 };
 
 Explosion.prototype = new Sprite();
@@ -312,6 +316,9 @@ Explosion.prototype = new Sprite();
 Explosion.prototype.step = function(dt) {
   this.frame++;
   if(this.frame >= 12) {
+    //Fire the callback if any has been passed - CarlosR
+    if(this.callback)
+      this.callback();
     this.board.remove(this);
   }
 };
