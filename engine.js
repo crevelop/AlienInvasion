@@ -460,7 +460,7 @@ var GameLives = function() {
 
     var txt = "Lives: " + Game.lives;
 
-    ctx.fillText(txt,240,20);
+    ctx.fillText(txt,Game.width - 80,20);
     ctx.restore();
 
   };
