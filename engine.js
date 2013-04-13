@@ -77,7 +77,11 @@ var Game = new function() {
   var lastTime = new Date().getTime();
   var maxTime = 1/30;
   // Game Loop
-  this.loop = function(curTime) { 
+  this.loop = function() { 
+    //dt was getting NaN sometimes due to wrong timestamp passed in curTime -CarlosR
+    //Now we get our own timeStamp - CarlosR
+    var curTime = new Date().getTime();
+
     requestAnimationFrame(Game.loop);
     var dt = (curTime - lastTime)/1000;
     if(dt > maxTime) { dt = maxTime; }
