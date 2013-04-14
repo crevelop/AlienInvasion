@@ -363,6 +363,11 @@ var TouchControls = function() {
   var unitWidth = Game.width/5;
   var blockWidth = unitWidth-gutterWidth;
 
+//Keep track of last touch position - CarlosR
+  var lastX;
+  var lastY;
+  
+
   this.drawSquare = function(ctx,x,y,txt,on) {
     ctx.globalAlpha = on ? 0.9 : 0.6;
     ctx.fillStyle =  "#CCC";
@@ -383,8 +388,9 @@ var TouchControls = function() {
     ctx.save();
 
     var yLoc = Game.height - unitWidth;
-    this.drawSquare(ctx,gutterWidth,yLoc,"\u25C0", Game.keys['left']);
-    this.drawSquare(ctx,unitWidth + gutterWidth,yLoc,"\u25B6", Game.keys['right']);
+    //Removed left and right buttons - CarlosR
+    // this.drawSquare(ctx,gutterWidth,yLoc,"\u25C0", Game.keys['left']);
+    // this.drawSquare(ctx,unitWidth + gutterWidth,yLoc,"\u25B6", Game.keys['right']);
     this.drawSquare(ctx,4*unitWidth,yLoc,"A",Game.keys['fire']);
 
     ctx.restore();
@@ -393,31 +399,92 @@ var TouchControls = function() {
   this.step = function(dt) { };
 
   this.trackTouch = function(e) {
-    var touch, x;
-
+    var fireTouch, moveTouch, x, y;
     e.preventDefault();
     Game.keys['left'] = false;
     Game.keys['right'] = false;
-    for(var i=0;i<e.targetTouches.length;i++) {
-      touch = e.targetTouches[i];
-      x = touch.pageX / Game.canvasMultiplier - Game.canvas.offsetLeft;
-      if(x < unitWidth) {
-        Game.keys['left'] = true;
-      } 
-      if(x > unitWidth && x < 2*unitWidth) {
-        Game.keys['right'] = true;
-      } 
-    }
+    Game.keys['up'] = false;
+    Game.keys['down'] = false;
 
+    //Now drag finger to move ship around - CarlosR
+    for(var i=0;i<e.targetTouches.length;i++) {
+
+      switch(e.type)
+      {
+        case 'touchmove':
+
+            if(e.targetTouches[i].pageX > 4*unitWidth 
+              && e.targetTouches[i].pageY > Game.height - unitWidth)
+              break;
+
+            moveTouch = e.targetTouches[i];
+
+            if(lastX!=0)
+            {
+              var deltaX = moveTouch.pageX - lastX;
+              if(deltaX>0)
+                Game.keys['right'] = true;
+              else if(deltaX < 0)
+                Game.keys['left'] = true;
+            }
+
+            if(lastY != 0)
+            {
+              var deltaY = moveTouch.pageY - lastY;
+              if(deltaY>0)
+                Game.keys['down'] = true;
+              else if(deltaY<0)
+                Game.keys['up'] = true;
+            }
+            
+            
+            lastX = moveTouch.pageX;
+            lastY = moveTouch.pageY;
+        break;
+
+      }
+
+    }
+    
     if(e.type == 'touchstart' || e.type == 'touchend') {
-      for(i=0;i<e.changedTouches.length;i++) {
-        touch = e.changedTouches[i];
-        x = touch.pageX / Game.canvasMultiplier - Game.canvas.offsetLeft;
-        if(x > 4 * unitWidth) {
+    for(i=0;i<e.changedTouches.length;i++) {
+        fireTouch = e.changedTouches[i];
+        x = fireTouch.pageX / Game.canvasMultiplier - Game.canvas.offsetLeft;
+        if(x > 4 * unitWidth && fireTouch.pageY > Game.height - unitWidth) {
           Game.keys['fire'] = (e.type == 'touchstart');
+        }
+        else
+        {
+          lastX = 0;
+          lastY = 0;
         }
       }
     }
+  
+    //Old code to support arrow buttons - CarlosR
+    // e.preventDefault();
+    // Game.keys['left'] = false;
+    // Game.keys['right'] = false;
+    // for(var i=0;i<e.targetTouches.length;i++) {
+    //   touch = e.targetTouches[i];
+    //   x = touch.pageX / Game.canvasMultiplier - Game.canvas.offsetLeft;
+    //   if(x < unitWidth) {
+    //     Game.keys['left'] = true;
+    //   } 
+    //   if(x > unitWidth && x < 2*unitWidth) {
+    //     Game.keys['right'] = true;
+    //   } 
+    // }
+
+    // if(e.type == 'touchstart' || e.type == 'touchend') {
+    //   for(i=0;i<e.changedTouches.length;i++) {
+    //     touch = e.changedTouches[i];
+    //     x = touch.pageX / Game.canvasMultiplier - Game.canvas.offsetLeft;
+    //     if(x > 4 * unitWidth) {
+    //       Game.keys['fire'] = (e.type == 'touchstart');
+    //     }
+    //   }
+    // }
   };
 
   Game.canvas.addEventListener('touchstart',this.trackTouch,true);

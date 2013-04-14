@@ -160,8 +160,8 @@ var PlayerShip = function() {
     else { this.vx = 0; }
 
     //Checks for up or down input - CarlosR
-    if(Game.keys['up']) { this.vy = -this.maxVel; }
-    else if(Game.keys['down']) { this.vy = this.maxVel; }
+    if(Game.keys['up']) { this.vy = -this.maxVel*0.5; }
+    else if(Game.keys['down']) { this.vy = this.maxVel*0.5; }
     else { this.vy = 0; }
 
     this.x += this.vx * dt;
